@@ -1,0 +1,247 @@
+/* =========================
+   PAGE LAYOUT
+========================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  overflow-x: hidden;
+  background: #f5f7fb;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.invoice-layout {
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.invoice-content {
+  flex: 1;
+  padding: 20px;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.invoice-content h1 {
+  color: #2563eb;
+  margin-bottom: 20px;
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.section {
+  background: #fff;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+
+.section h2 {
+  color: #2563eb;
+  margin-bottom: 18px;
+  border-left: 5px solid #2563eb;
+  padding-left: 12px;
+}
+
+/* =========================
+   INPUTS
+========================= */
+
+.section input,
+.section select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d8dee9;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.section input:focus,
+.section select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 10px rgba(37,99,235,0.2);
+}
+
+/* =========================
+   COMPANY & CUSTOMER GRID
+========================= */
+
+.section:first-child,
+.section:nth-child(2) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.section:first-child h2,
+.section:nth-child(2) h2 {
+  grid-column: 1 / -1;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+button {
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+.generate-btn {
+  background: #b1ae0f;
+  color: white;
+  padding: 14px 25px;
+  border-radius: 10px;
+  font-weight: 600;
+  margin-top: 15px;
+}
+
+.generate-btn:hover {
+  background:  #b1ae0f;
+}
+
+/* Add Item */
+.section button:not(.generate-btn) {
+  background: #2563eb;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+/* =========================
+   TABLE
+========================= */
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.invoice-table th {
+  background: #2563eb;
+  color: white;
+  padding: 12px;
+  font-size: 14px;
+}
+
+.invoice-table td {
+  border: 1px solid #e5e7eb;
+  padding: 10px;
+  text-align: center;
+}
+
+.invoice-table td input,
+.invoice-table td select {
+  width: 100%;
+  min-width: 80px;
+  margin: 0;
+}
+
+.invoice-table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.invoice-table tbody tr:hover {
+  background: #eef4ff;
+}
+
+/* Remove Button */
+.invoice-table td button {
+  background: #ef4444;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+/* =========================
+   INVOICE PREVIEW
+========================= */
+
+.invoice-preview {
+  background: white;
+}
+
+.company-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.company-logo {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.company-info h2 {
+  color: #2563eb;
+  margin-bottom: 8px;
+}
+
+.company-info p {
+  color: #555;
+  margin: 4px 0;
+}
+
+.invoice-preview hr {
+  margin: 18px 0;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+
+.invoice-preview h3 {
+  margin-top: 10px;
+  color: #111827;
+}
+
+.invoice-preview h2:last-of-type {
+  color: #b1ae0f;
+  font-size: 28px;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 768px) {
+  .invoice-content {
+    padding: 12px;
+  }
+
+  .company-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .invoice-table {
+    min-width: 900px;
+  }
+}

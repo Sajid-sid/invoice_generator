@@ -1,0 +1,37 @@
+.customers-layout {
+  display: flex;
+}
+
+.customers-content {
+  flex: 1;
+  padding: 20px;
+}
+
+.customer-form {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.customer-form input {
+  padding: 10px;
+}
+
+.customer-form button {
+  padding: 10px 15px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+th {
+  background: #f4f4f4;
+}

@@ -1,0 +1,21 @@
+.dashboard-layout {
+  display: flex;
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 20px;
+}
+
+.cards {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.card {
+  width: 200px;
+  padding: 20px;
+  background: #f4f4f4;
+  border-radius: 10px;
+}
