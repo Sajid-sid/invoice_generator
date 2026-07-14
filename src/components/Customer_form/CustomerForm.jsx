@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import "./Customer_form.css"
+import "./Customer_form.css";
+
 function Customers() {
   const [customers, setCustomers] = useState([]);
+
   const [formData, setFormData] = useState({
     customerName: "",
     gstin: "",
@@ -9,15 +11,34 @@ function Customers() {
     email: "",
   });
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [editIndex, setEditIndex] = useState(null);
+  const [editingId, setEditingId] = useState(null);
 
+
+  // Fetch customers from database
   useEffect(() => {
-    const savedCustomers =
-      JSON.parse(localStorage.getItem("customers")) || [];
-    setCustomers(savedCustomers);
+    fetchCustomers();
   }, []);
 
+
+  const fetchCustomers = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/customers"
+      );
+
+      const data = await response.json();
+
+      console.log("Customers:", data);
+
+      setCustomers(data);
+
+    } catch (error) {
+      console.error("Fetch Error:", error);
+    }
+  };
+
+
+  // Input change
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -25,71 +46,108 @@ function Customers() {
     });
   };
 
-  const handleSubmit = (e) => {
+
+  // Add / Update customer
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    let updatedCustomers;
+    try {
 
-    if (isEditing) {
-      updatedCustomers = [...customers];
-      updatedCustomers[editIndex] = formData;
+      const url = editingId
+        ? `http://localhost:5000/api/customers/${editingId}`
+        : "http://localhost:5000/api/customers";
 
-      setIsEditing(false);
-      setEditIndex(null);
-    } else {
-      updatedCustomers = [...customers, formData];
-    }
 
-    setCustomers(updatedCustomers);
+      const method = editingId ? "PUT" : "POST";
 
-    localStorage.setItem(
-      "customers",
-      JSON.stringify(updatedCustomers)
-    );
 
-    setFormData({
-      customerName: "",
-      gstin: "",
-      phone: "",
-      email: "",
-    });
-  };
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          customerName: formData.customerName,
+          gstin: formData.gstin,
+          phone: formData.phone,
+          email: formData.email,
+        }),
+      });
 
-  const handleEdit = (index) => {
-    setFormData(customers[index]);
-    setIsEditing(true);
-    setEditIndex(index);
-  };
 
-  const handleDelete = (index) => {
-    const updatedCustomers = customers.filter(
-      (_, i) => i !== index
-    );
+      const data = await response.json();
 
-    setCustomers(updatedCustomers);
+      console.log("Response:", data);
 
-    localStorage.setItem(
-      "customers",
-      JSON.stringify(updatedCustomers)
-    );
 
-    if (isEditing && editIndex === index) {
-      setIsEditing(false);
-      setEditIndex(null);
+      fetchCustomers();
+
+
+      setEditingId(null);
+
       setFormData({
         customerName: "",
         gstin: "",
         phone: "",
         email: "",
       });
+
+
+    } catch (error) {
+      console.error("Submit Error:", error);
     }
   };
 
+
+  // Edit customer
+  const handleEdit = (customer) => {
+
+    setFormData({
+      customerName: customer.name,
+      gstin: customer.gstNumber,
+      phone: customer.phone,
+      email: customer.email,
+    });
+
+
+    setEditingId(customer.id);
+  };
+
+
+  // Delete customer
+  const handleDelete = async (id) => {
+
+    try {
+
+      await fetch(
+        `http://localhost:5000/api/customers/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+
+      fetchCustomers();
+
+
+    } catch (error) {
+
+      console.error("Delete Error:", error);
+
+    }
+
+  };
+
+
   return (
     <div style={{ padding: "20px" }}>
+
       <h2>Customer Management</h2>
 
+
       <form onSubmit={handleSubmit}>
+
+
         <input
           type="text"
           name="customerName"
@@ -99,6 +157,7 @@ function Customers() {
           required
         />
 
+
         <input
           type="text"
           name="gstin"
@@ -106,6 +165,7 @@ function Customers() {
           value={formData.gstin}
           onChange={handleChange}
         />
+
 
         <input
           type="text"
@@ -115,6 +175,7 @@ function Customers() {
           onChange={handleChange}
         />
 
+
         <input
           type="email"
           name="email"
@@ -123,58 +184,81 @@ function Customers() {
           onChange={handleChange}
         />
 
+
         <button type="submit">
-          {isEditing ? "Update Customer" : "Add Customer"}
+          {editingId ? "Update Customer" : "Add Customer"}
         </button>
+
+
       </form>
+
 
       <hr />
 
+
       <h3>Customer List</h3>
 
-      {customers.length === 0 ? (
-        <p>No customers found.</p>
-      ) : (
-        <table border="1" cellPadding="10">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>GSTIN</th>
-              <th>Phone</th>
-              <th>Email</th>
-              <th>Actions</th>
+
+      <table border="1" cellPadding="10">
+
+        <thead>
+
+          <tr>
+            <th>Name</th>
+            <th>GSTIN</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          {customers.map((customer)=>(
+
+            <tr key={customer.id}>
+
+              <td>{customer.name}</td>
+
+              <td>{customer.gstNumber}</td>
+
+              <td>{customer.phone}</td>
+
+              <td>{customer.email}</td>
+
+
+              <td>
+
+                <button
+                  type="button"
+                  onClick={() => handleEdit(customer)}
+                >
+                  Edit
+                </button>
+
+
+                <button
+                  type="button"
+                  onClick={() => handleDelete(customer.id)}
+                  style={{marginLeft:"10px"}}
+                >
+                  Delete
+                </button>
+
+
+              </td>
+
             </tr>
-          </thead>
 
-          <tbody>
-            {customers.map((customer, index) => (
-              <tr key={index}>
-                <td>{customer.customerName}</td>
-                <td>{customer.gstin}</td>
-                <td>{customer.phone}</td>
-                <td>{customer.email}</td>
+          ))}
 
-                <td>
-                  <button
-                    onClick={() => handleEdit(index)}
-                    type="button"
-                  >
-                    Edit
-                  </button>
+        </tbody>
 
-                  <button
-                    onClick={() => handleDelete(index)}
-                    type="button"
-                    style={{ marginLeft: "10px" }}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      </table>
+
+
     </div>
   );
 }

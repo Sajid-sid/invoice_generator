@@ -22,14 +22,20 @@ function Customers() {
 
 const fetchCustomers = async () => {
   try {
-    const response = await fetch("http://localhost:5000/api/customers");
-    const data = await response.json();
+    console.log("Starting API call");
 
-    console.log("Customers:", data);
+    const response = await fetch(
+      "http://localhost:5000/api/customers"
+    );
 
-    setCustomers(data);
-  } catch (err) {
-    console.log(err);
+    console.log("Response status:", response.status);
+
+    const text = await response.text();
+
+    console.log("Raw response:", text);
+
+  } catch (error) {
+    console.log("Fetch error:", error);
   }
 };
 
@@ -58,8 +64,8 @@ const handleSubmit = async (e) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        customerName: formData.customerName,
-        gstin: formData.gstin,
+        name: formData.customerName,
+        gstNumber: formData.gstin,
         phone: formData.phone,
         email: formData.email,
       }),
@@ -67,9 +73,9 @@ const handleSubmit = async (e) => {
 
     const data = await response.json();
 
-    console.log(data);
+    console.log("Status:", response.status);
+    console.log("Backend:", data);
 
-    // Reload customers from database
     fetchCustomers();
 
     setEditingId(null);
@@ -82,7 +88,7 @@ const handleSubmit = async (e) => {
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("Error:", err);
   }
 };
 const handleEdit = (customer) => {
