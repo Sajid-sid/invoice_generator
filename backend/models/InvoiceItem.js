@@ -1,20 +1,47 @@
-// models/Invoice.js
 import { DataTypes } from "sequelize";
 import sequelize from "../config/db.js";
 
-const Invoice = sequelize.define(
-  "Invoice",
+const InvoiceItem = sequelize.define(
+  "InvoiceItem",
   {
-    invoiceNumber: DataTypes.STRING,
-    subTotal: DataTypes.FLOAT,
-    gstTotal: DataTypes.FLOAT,
-    grandTotal: DataTypes.FLOAT,
+    InvoiceId: {
+      type: DataTypes.INTEGER,
+    },
+
+    productName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+
+    hsnCode: {
+      type: DataTypes.STRING,
+    },
+
+    quantity: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+
+    price: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+
+    gst: {
+      type: DataTypes.FLOAT,
+      defaultValue: 18,
+    },
+
+    total: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
   },
   {
-    tableName: "invoices",   // <-- Your MySQL table name
-    timestamps: true,        // createdAt & updatedAt exist
+    tableName: "invoice_items",
     freezeTableName: true,
+    timestamps: true,
   }
 );
 
-export default Invoice;
+export default InvoiceItem;

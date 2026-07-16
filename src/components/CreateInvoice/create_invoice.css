@@ -106,8 +106,8 @@ button:hover {
 }
 
 .generate-btn {
-  background: #b1ae0f;
-  color: white;
+  background: #f8c808;
+  color: rgb(20, 20, 20);
   padding: 14px 25px;
   border-radius: 10px;
   font-weight: 600;
@@ -115,7 +115,7 @@ button:hover {
 }
 
 .generate-btn:hover {
-  background:  #b1ae0f;
+  background:  #fcce18;
 }
 
 /* Add Item */
@@ -223,7 +223,7 @@ button:hover {
 }
 
 .invoice-preview h2:last-of-type {
-  color: #b1ae0f;
+  color: #fcce18;
   font-size: 28px;
 }
 

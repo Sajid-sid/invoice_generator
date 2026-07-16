@@ -1,15 +1,14 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
-
+import jwt from "jsonwebtoken";
 const router = express.Router();
 
 /* SIGNUP */
 router.post("/signup", async (req, res) => {
   try {
-    console.log("🔥 SIGNUP API HIT");
 
-    // 🔥 log headers also (helps debug frontend issues)
+
     console.log("HEADERS:", req.headers["content-type"]);
 
     // 🔥 ensure JSON body is parsed
@@ -49,7 +48,6 @@ router.post("/signup", async (req, res) => {
       role: "admin"
     });
 
-    console.log("✅ USER SAVED IN DB:", user.toJSON());
 
     return res.status(201).json({
       message: "Signup successful",
@@ -74,8 +72,7 @@ router.post("/signup", async (req, res) => {
 /* LOGIN */
 router.post("/login", async (req, res) => {
   try {
-    console.log("🔥 LOGIN API HIT");
-    console.log("BODY:", req.body);
+  
 
     const { email, password } = req.body;
 
@@ -98,13 +95,31 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid Password" });
     }
 
-    console.log("✅ LOGIN SUCCESS:", user.email);
 
-    res.json({
-      message: "Login Successful",
-      user
-    });
 
+const token = jwt.sign(
+  {
+    id: user.id,
+    email: user.email,
+    role: user.role
+  },
+  process.env.JWT_SECRET,
+  {
+    expiresIn: "1d"
+  }
+);
+
+
+res.json({
+  message: "Login Successful",
+  token,
+  user: {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role
+  }
+});
   } catch (error) {
     console.log("❌ LOGIN ERROR:", error);
     res.status(500).json({ message: error.message });

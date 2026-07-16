@@ -208,6 +208,51 @@ const isIntraState =
   };
 
   const totals = calculateTotals();
+const saveInvoice = async () => {
+
+  const token = localStorage.getItem("token");
+
+  console.log("========== CREATE INVOICE TOKEN ==========");
+  console.log(token);
+
+  if(!token){
+    console.log("NO TOKEN FOUND");
+    alert("Please login again");
+    return;
+  }
+
+  const payload = {
+    invoiceNumber: invoiceDetails.invoiceNo,
+    CustomerId: 1,
+    items: items.map((item)=>({
+      name: item.itemName,
+      hsnCode: item.hsn,
+      quantity: Number(item.quantity),
+      price: Number(item.price),
+      gstRate: Number(item.gst)
+    }))
+  };
+
+
+  const response = await fetch(
+    "http://localhost:5000/api/invoices/create",
+    {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        Authorization:`Bearer ${token}`
+      },
+      body:JSON.stringify(payload)
+    }
+  );
+
+  console.log("STATUS:", response.status);
+
+  const data = await response.json();
+
+  console.log("BACKEND RESPONSE:", data);
+
+};
 
 const generateInvoice = () => {
   const doc = new jsPDF();
@@ -995,11 +1040,17 @@ console.log(bankDetails);
               {totals.grandTotal}
             </h2>
 
-          <button
-  className="generate-btn"
-  onClick={generateInvoice}
+ <button
+className="generate-btn"
+onClick={()=>{
+
+ saveInvoice();
+
+ generateInvoice();
+
+}}
 >
-  Generate Invoice PDF
+Generate Invoice PDF
 </button>
           </div>
         </div>

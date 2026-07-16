@@ -14,6 +14,13 @@ function Signup() {
 
     try {
       console.log("🔥 Signup clicked");
+      console.log(
+  "SIGNUP URL:",
+  `${import.meta.env.VITE_API_URL}/api/auth/signup`
+  
+);
+
+console.log("ENV:", import.meta.env.VITE_API_URL);
 
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/auth/signup`,

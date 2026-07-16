@@ -8,38 +8,45 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+const handleLogin = async (e) => {
+  e.preventDefault();
 
-    try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email,
-          password
-        })
-      });
+  try {
+    const res = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      console.log("LOGIN RESPONSE:", data);
+    console.log("LOGIN RESPONSE:", data);
 
-      if (!res.ok) {
-        alert(data.message);
-        return;
-      }
-
-      // success
-      navigate("/dashboard");
-
-    } catch (error) {
-      console.log("LOGIN ERROR:", error);
-      alert("Server error");
+    if (!res.ok) {
+      alert(data.message);
+      return;
     }
-  };
+
+    // Save token and user in localStorage
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    console.log("Saved Token:", localStorage.getItem("token"));
+console.log("TOKEN BEFORE DASHBOARD:", data.token);
+console.log("LOCAL STORAGE:", localStorage.getItem("token"));
+    // Navigate to dashboard
+    navigate("/dashboard");
+
+  } catch (error) {
+    console.log("LOGIN ERROR:", error);
+    alert("Server error");
+  }
+};
 
   return (
     <div className="auth-container">

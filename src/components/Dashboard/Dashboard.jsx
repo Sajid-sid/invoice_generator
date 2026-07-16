@@ -6,7 +6,7 @@ import "./Dashboard.css";
 function Dashboard() {
   const [stats, setStats] = useState({
     customers: 0,
-    products: 0,
+  
     invoices: 0,
   });
 
@@ -14,32 +14,32 @@ useEffect(() => {
   fetchDashboardStats();
 }, []);
 
-  const fetchDashboardStats = async () => {
+const fetchDashboardStats = async () => {
   try {
-    console.log("Calling Dashboard API...");
+
 
     const response = await fetch(
       "http://localhost:5000/api/dashboard/stats"
     );
 
-    console.log("Status:", response.status);
+  
 
     const data = await response.json();
 
-    console.log("Dashboard Data:", data);
+
 
     setStats({
       customers: data.customers || 0,
-      products: data.products || 0,
+   
       invoices: data.invoices || 0,
     });
 
   } catch (error) {
-    console.error("Dashboard Error:", error);
+    console.error("Dashboard Error:", error.message);
   }
 };
   useEffect(() => {
-    console.log("Updated Stats:", stats);
+   
   }, [stats]);
 
   return (
@@ -58,10 +58,6 @@ useEffect(() => {
               <p>{stats.customers}</p>
             </div>
 
-            <div className="card">
-              <h3>Total Products</h3>
-              <p>{stats.products}</p>
-            </div>
 
             <div className="card">
               <h3>Total Invoices</h3>
