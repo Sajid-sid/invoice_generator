@@ -16,34 +16,88 @@ router.post(
   "/create",
   authMiddleware,
   async (req, res) => {
+
     const transaction = await Invoice.sequelize.transaction();
 
     try {
-      const {
-        invoiceNumber,
-       
-        CustomerId,
-        items,
-      } = req.body;
+const {
+
+invoiceNumber,
+
+CustomerId,
+
+companyName,
+
+companyGST,
+
+companyAddress,
+
+
+subTotal,
+
+cgst,
+
+sgst,
+
+igst,
+
+gstTotal,
+
+grandTotal,
+
+
+items
+
+} = req.body;
+
+
+      // ============================
+      // CHECK INVOICE LIMIT
+      // ============================
+
+      const invoiceCount = await Invoice.count({
+        where:{
+          CustomerId: CustomerId
+        }
+      });
+
+
+      if(invoiceCount >= 3){
+
+        await transaction.rollback();
+
+        return res.status(403).json({
+          allowed:false,
+          message:"You have reached the invoice limit. Please subscribe to continue."
+        });
+
+      }
+
 
 
       // Validate items
       if (!items || items.length === 0) {
+
+        await transaction.rollback();
+
         return res.status(400).json({
-          message: "Invoice items are required"
+          message:"Invoice items are required"
         });
+
       }
 
 
+
       // Calculate GST
-      const {
-        subTotal,
-        cgst,
-        sgst,
-        igst,
-        gstTotal,
-        grandTotal,
-      } = calculateGST(items);
+      // const {
+      //   subTotal,
+      //   cgst,
+      //   sgst,
+      //   igst,
+      //   gstTotal,
+      //   grandTotal,
+
+      // } = calculateGST(items);
 
 
 
@@ -51,76 +105,100 @@ router.post(
       const invoice = await Invoice.create(
         {
           invoiceNumber,
-     
-          CustomerId,
 
-          invoiceDate: new Date(),
+ CustomerId,
 
-          subTotal,
-          cgst,
-          sgst,
-          igst,
-          gstTotal,
-          grandTotal,
+ invoiceDate:new Date(),
 
-          
+
+ // Company Details
+ companyName,
+ companyGST,
+ companyAddress,
+
+
+ // GST Amounts
+ subTotal,
+ cgst,
+ sgst,
+ igst,
+ gstTotal,
+ grandTotal,
+
+
         },
-        { transaction }
+        {
+          transaction
+        }
       );
 
 
 
       // Create Invoice Items
- const invoiceItems = items.map((item)=>({
 
-    productName:item.name,
+      const invoiceItems = items.map((item)=>({
 
-    hsnCode:item.hsnCode,
+        productName:item.name,
 
-    quantity:item.quantity,
+        hsnCode:item.hsnCode,
 
-    price:item.price,
+        quantity:item.quantity,
 
-    gst:item.gstRate,
+        price:item.price,
 
-    total:
-    item.quantity * item.price,
+        gst:item.gstRate,
 
-    InvoiceId:invoice.id
+        total:item.quantity * item.price,
 
-}));
+        InvoiceId:invoice.id
+
+      }));
+
 
 
       await InvoiceItem.bulkCreate(
         invoiceItems,
-        { transaction }
+        {
+          transaction
+        }
       );
 
 
-      // Commit transaction
+
       await transaction.commit();
 
 
       res.status(201).json({
-        message: "Invoice Created Successfully",
-        invoice,
+
+        message:"Invoice Created Successfully",
+
+        invoice
+
       });
 
 
-    } catch (error) {
+
+    } catch(error){
+
 
       await transaction.rollback();
 
+
       console.log(error);
 
+
       res.status(500).json({
-        message: "Server Error",
+
+        message:"Server Error",
+
         error:error.message
+
       });
+
     }
+
   }
 );
-
 /* ======================
    GET ALL INVOICES
 ====================== */

@@ -109,6 +109,7 @@ const isIntraState =
   { name: "Transport Services", hsn: "9965", gst: 5 }
 ];
   const [customer, setCustomer] = useState({
+    
     customerName: "",
     gstin: "",
     address: ""
@@ -208,52 +209,150 @@ const isIntraState =
   };
 
   const totals = calculateTotals();
-const saveInvoice = async () => {
+  const checkInvoiceLimit = async () => {
 
-  const token = localStorage.getItem("token");
+  try {
 
-  console.log("========== CREATE INVOICE TOKEN ==========");
-  console.log(token);
+    const response = await fetch(
+      `http://localhost:5000/api/invoices/invoice-limit/${customer.customerId}`
+    );
 
-  if(!token){
-    console.log("NO TOKEN FOUND");
-    alert("Please login again");
-    return;
+    const data = await response.json();
+
+    console.log("LIMIT RESPONSE:", data);
+
+
+    if(!data.allowed){
+
+      alert(data.message);
+
+      return false;
+    }
+
+
+    return true;
+
+
+  } catch(error){
+
+    console.log(error);
+
+    alert("Unable to check invoice limit");
+
+    return false;
   }
 
-  const payload = {
-    invoiceNumber: invoiceDetails.invoiceNo,
-    CustomerId: 1,
-    items: items.map((item)=>({
-      name: item.itemName,
-      hsnCode: item.hsn,
-      quantity: Number(item.quantity),
-      price: Number(item.price),
-      gstRate: Number(item.gst)
-    }))
-  };
+};
+const saveInvoice = async () => {
+
+  try {
+
+    const token = localStorage.getItem("token");
 
 
-  const response = await fetch(
-    "http://localhost:5000/api/invoices/create",
-    {
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        Authorization:`Bearer ${token}`
-      },
-      body:JSON.stringify(payload)
+    const cgstAmount = isIntraState 
+      ? totals.gstAmount / 2 
+      : 0;
+
+    const sgstAmount = isIntraState 
+      ? totals.gstAmount / 2 
+      : 0;
+
+    const igstAmount = !isIntraState
+      ? totals.gstAmount
+      : 0;
+
+
+    const payload = {
+
+      invoiceNumber: invoiceDetails.invoiceNo,
+
+      CustomerId: customer.customerId,
+
+
+      // Company details
+      companyName: company.companyName,
+      companyGST: company.gstin,
+      companyAddress: company.address,
+
+
+      // GST details
+      subTotal: totals.subtotal,
+
+      cgst: cgstAmount,
+
+      sgst: sgstAmount,
+
+      igst: igstAmount,
+
+      gstTotal: totals.gstAmount,
+
+      grandTotal: totals.grandTotal,
+
+
+      items: items.map((item)=>({
+
+        name:item.itemName,
+
+        hsnCode:item.hsn,
+
+        quantity:Number(item.quantity),
+
+        price:Number(item.price),
+
+        gstRate:Number(item.gst)
+
+      }))
+
+    };
+
+
+    console.log("Sending Invoice Payload:", payload);
+
+
+    const response = await fetch(
+      "http://localhost:5000/api/invoices/create",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          Authorization:`Bearer ${token}`
+        },
+        body:JSON.stringify(payload)
+      }
+    );
+
+
+    const data = await response.json();
+
+    console.log("API RESPONSE:", data);
+
+
+    if(!response.ok){
+
+      alert(data.message || "Invoice creation failed");
+
+      return false;
+
     }
-  );
 
-  console.log("STATUS:", response.status);
 
-  const data = await response.json();
+    alert("Invoice saved successfully");
 
-  console.log("BACKEND RESPONSE:", data);
+    return true;
+
+
+  } catch(error){
+
+    console.log("SAVE INVOICE ERROR:", error);
+
+    alert("Unable to save invoice");
+
+    return false;
+
+  }
 
 };
-
 const generateInvoice = () => {
   const doc = new jsPDF();
 
@@ -627,6 +726,17 @@ console.log(bankDetails);
           
           
 <div className="section">
+<input
+ type="number"
+ placeholder="Customer ID"
+ value={customer.customerId}
+ onChange={(e)=>
+   setCustomer({
+     ...customer,
+     customerId:e.target.value
+   })
+ }
+/>
   <h2>Invoice Details</h2>
 
   <input
@@ -1040,17 +1150,21 @@ console.log(bankDetails);
               {totals.grandTotal}
             </h2>
 
- <button
-className="generate-btn"
-onClick={()=>{
+<button
+  className="generate-btn"
+  onClick={async()=>{
 
- saveInvoice();
+    const saved = await saveInvoice();
 
- generateInvoice();
+    if(!saved){
+      return;
+    }
 
-}}
+    generateInvoice();
+
+  }}
 >
-Generate Invoice PDF
+  Generate Invoice PDF
 </button>
           </div>
         </div>

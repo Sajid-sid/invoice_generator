@@ -1,4 +1,4 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import CustomerForm from "../../components/Customer_form/CustomerForm";
@@ -19,28 +19,24 @@ function Customers() {
   useEffect(() => {
     fetchCustomers();
   }, []);
+  const fetchCustomers = async () => {
+    try {
+      console.log("Starting API call");
 
-const fetchCustomers = async () => {
-  try {
-    console.log("Starting API call");
+      const response = await fetch(
+        "http://localhost:5000/api/customers"
+      );
 
-    const response = await fetch(
-      "http://localhost:5000/api/customers"
-    );
+      console.log("Response status:", response.status);
 
-    console.log("Response status:", response.status);
+      const text = await response.text();
 
-    const text = await response.text();
+      console.log("Raw response:", text);
 
-    console.log("Raw response:", text);
-
-  } catch (error) {
-    console.log("Fetch error:", error);
-  }
-};
-
-
-
+    } catch (error) {
+      console.log("Fetch error:", error);
+    }
+  };
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -48,71 +44,69 @@ const fetchCustomers = async () => {
     });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
-    const url = editingId
-      ? `http://localhost:5000/api/customers/${editingId}`
-      : "http://localhost:5000/api/customers";
+    try {
+      const url = editingId
+        ? `http://localhost:5000/api/customers/${editingId}`
+        : "http://localhost:5000/api/customers";
+      const method = editingId ? "PUT" : "POST";
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.customerName,
+          gstNumber: formData.gstin,
+          phone: formData.phone,
+          email: formData.email,
+        }),
+      });
 
-    const method = editingId ? "PUT" : "POST";
+      const data = await response.json();
 
-    const response = await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: formData.customerName,
-        gstNumber: formData.gstin,
-        phone: formData.phone,
-        email: formData.email,
-      }),
-    });
+      console.log("Status:", response.status);
+      console.log("Backend:", data);
 
-    const data = await response.json();
+      fetchCustomers();
 
-    console.log("Status:", response.status);
-    console.log("Backend:", data);
+      setEditingId(null);
 
-    fetchCustomers();
+      setFormData({
+        customerName: "",
+        gstin: "",
+        phone: "",
+        email: "",
+      });
 
-    setEditingId(null);
-
+    } catch (err) {
+      console.error("Error:", err);
+    }
+  };
+  const handleEdit = (customer) => {
     setFormData({
-      customerName: "",
-      gstin: "",
-      phone: "",
-      email: "",
+      customerName: customer.name,
+      gstin: customer.gstNumber,
+      phone: customer.phone,
+      email: customer.email,
     });
 
-  } catch (err) {
-    console.error("Error:", err);
-  }
-};
-const handleEdit = (customer) => {
-  setFormData({
-    customerName: customer.name,
-    gstin: customer.gstNumber,
-    phone: customer.phone,
-    email: customer.email,
-  });
+    setEditingId(customer.id);
+  };
 
-  setEditingId(customer.id);
-};
+  const handleDelete = async (id) => {
+    try {
+      await fetch(`http://localhost:5000/api/customers/${id}`, {
+        method: "DELETE",
+      });
 
-const handleDelete = async (id) => {
-  try {
-    await fetch(`http://localhost:5000/api/customers/${id}`, {
-      method: "DELETE",
-    });
-
-    fetchCustomers();
-  } catch (err) {
-    console.log(err);
-  }
-};
+      fetchCustomers();
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
     <>
@@ -132,14 +126,14 @@ const handleDelete = async (id) => {
           />
 
           <table>
-        
+
             <tbody>
               {customers.map((customer) => (
                 <tr key={customer.id}>
                   <td>{customer.name}</td>
-<td>{customer.gstNumber}</td>
-<td>{customer.phone}</td>
-<td>{customer.email}</td>
+                  <td>{customer.gstNumber}</td>
+                  <td>{customer.phone}</td>
+                  <td>{customer.email}</td>
 
                   <td>
                     <button

@@ -19,12 +19,15 @@ router.get("/", async (req, res) => {
 // Add customer
 router.post("/", async (req, res) => {
   try {
+     
     const customer = await Customer.create({
       name: req.body.customerName,
       gstNumber: req.body.gstin,
       phone: req.body.phone,
       email: req.body.email,
     });
+       
+
 
     res.json(customer);
   } catch (err) {
